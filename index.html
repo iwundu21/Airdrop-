@@ -60,28 +60,6 @@
         if (!window.process) {
           window.process = { env: { NODE_ENV: 'development' } };
         }
-
-        // Fix for "Converting circular structure to JSON"
-        // This often happens when libraries or the environment try to serialize 
-        // objects like the Solana wallet adapter which contain circular references.
-        const originalStringify = JSON.stringify;
-        JSON.stringify = function(value, replacer, space) {
-          const cache = new Set();
-          try {
-            return originalStringify(value, (key, val) => {
-              if (typeof val === 'object' && val !== null) {
-                if (cache.has(val)) {
-                  return '[Circular]';
-                }
-                cache.add(val);
-              }
-              return replacer ? replacer(key, val) : val;
-            }, space);
-          } catch (err) {
-            console.warn('Exnus Hub: JSON.stringify failed even with circular check, returning fallback.', err);
-            return '[Unserializable Object]';
-          }
-        };
       })();
     </script>
   </head>

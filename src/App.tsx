@@ -12,7 +12,12 @@ import {
   TorusWalletAdapter,
   LedgerWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
-import { SolanaMobileWalletAdapter } from '@solana-mobile/wallet-adapter-mobile';
+import { 
+  SolanaMobileWalletAdapter,
+  createDefaultAddressSelector,
+  createDefaultAuthorizationResultCache,
+  createDefaultWalletNotFoundHandler
+} from '@solana-mobile/wallet-adapter-mobile';
 import {
   WalletModalProvider,
   WalletMultiButton,
@@ -372,25 +377,15 @@ export default function App() {
   const wallets = useMemo(
     () => [
       new SolanaMobileWalletAdapter({
-        addressSelector: { 
-          async select(addresses) {
-            return addresses[0];
-          }
-        },
+        addressSelector: createDefaultAddressSelector(),
         appIdentity: {
           name: 'Exnus Hub',
           uri: window.location.origin,
           icon: 'favicon.ico',
         },
-        authorizationResultCache: {
-          get: async () => null,
-          set: async () => {},
-          clear: async () => {},
-        },
+        authorizationResultCache: createDefaultAuthorizationResultCache(),
         cluster: 'mainnet-beta',
-        onWalletNotFound: async () => {
-          console.warn('Exnus Hub: Mobile wallet not found');
-        },
+        onWalletNotFound: createDefaultWalletNotFoundHandler(),
       }),
       new PhantomWalletAdapter(),
       new SolflareWalletAdapter(),
