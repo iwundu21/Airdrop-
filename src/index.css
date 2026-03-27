@@ -1,0 +1,42 @@
+@import "tailwindcss";
+@import "@solana/wallet-adapter-react-ui/styles.css";
+
+@theme {
+  --color-wine: #1a050b;
+  --color-wine-light: #2D0A16;
+  --color-wine-accent: #4A1024;
+}
+
+body {
+  background-color: var(--color-wine);
+  color: white;
+  font-family: 'Inter', sans-serif;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.wallet-adapter-button {
+  background-color: white !important;
+  color: black !important;
+  font-family: inherit !important;
+  font-weight: 600 !important;
+  border-radius: 9999px !important;
+  transition: all 0.2s ease !important;
+}
+
+.wallet-adapter-button:hover {
+  background-color: #f3f4f6 !important;
+  transform: translateY(-1px);
+}

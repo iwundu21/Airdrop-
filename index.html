@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exnus Hub</title>
+    <script>
+      (function() {
+        // Robust fix for "Cannot set property fetch of #<Window> which has only a getter"
+        // This error occurs when a library tries to assign to window.fetch in an environment
+        // where it's defined as a getter-only property on the prototype or instance.
+        
+        const originalFetch = window.fetch;
+        let currentFetch = originalFetch;
+
+        function defineFetch(obj) {
+          try {
+            Object.defineProperty(obj, 'fetch', {
+              get: function() { return currentFetch; },
+              set: function(v) { 
+                console.log('Exnus Hub: Fetch property assigned a new value.');
+                currentFetch = v; 
+              },
+              configurable: true,
+              enumerable: true
+            });
+            return true;
+          } catch (e) {
+            return false;
+          }
+        }
+
+        // Try to define on window instance first
+        if (!defineFetch(window)) {
+          console.warn('Exnus Hub: Could not redefine fetch on window instance. Trying prototypes...');
+          
+          // Try to define on Window prototype
+          let proto = Object.getPrototypeOf(window);
+          let redefined = false;
+          while (proto && !redefined) {
+            if (defineFetch(proto)) {
+              redefined = true;
+              console.log('Exnus Hub: Fetch property successfully redefined on prototype.');
+            }
+            proto = Object.getPrototypeOf(proto);
+          }
+
+          if (!redefined) {
+            // Last ditch effort: try to define on Window.prototype if it exists
+            try {
+              if (typeof Window !== 'undefined' && Window.prototype) {
+                defineFetch(Window.prototype);
+              }
+            } catch (e3) {}
+          }
+        }
+        
+        // Also ensure global and process are available immediately for some early-loading scripts
+        window.global = window;
+        if (!window.process) {
+          window.process = { env: { NODE_ENV: 'development' } };
+        }
+
+        // Fix for "Converting circular structure to JSON"
+        // This often happens when libraries or the environment try to serialize 
+        // objects like the Solana wallet adapter which contain circular references.
+        const originalStringify = JSON.stringify;
+        JSON.stringify = function(value, replacer, space) {
+          const cache = new Set();
+          try {
+            return originalStringify(value, (key, val) => {
+              if (typeof val === 'object' && val !== null) {
+                if (cache.has(val)) {
+                  return '[Circular]';
+                }
+                cache.add(val);
+              }
+              return replacer ? replacer(key, val) : val;
+            }, space);
+          } catch (err) {
+            console.warn('Exnus Hub: JSON.stringify failed even with circular check, returning fallback.', err);
+            return '[Unserializable Object]';
+          }
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
